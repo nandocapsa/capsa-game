@@ -49,7 +49,7 @@ function App() {
       newPlayers[i % 4].push(deck[i]);
     }
     setPlayers(newPlayers);
-    setTurn(0); // reset ke Player 1
+    setTurn(0); // reset giliran ke Player 1
   };
 
   const nextTurn = () => {
@@ -63,16 +63,18 @@ function App() {
       <h3 style={{ marginTop: "10px" }}>Giliran: Player {turn + 1}</h3>
       <button onClick={nextTurn}>Lewat</button>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginTop: "20px" }}>
         {players.map((cards, index) => (
           <div key={index}>
             <h4 style={{ color: turn === index ? "blue" : "black" }}>
               Player {index + 1}
             </h4>
             <div>
-              {cards.map((card, i) => (
-                <Card key={i} card={card} />
-              ))}
+              {turn === index ? (
+                cards.map((card, i) => <Card key={i} card={card} />)
+              ) : (
+                <p>{cards.length} kartu</p>
+              )}
             </div>
           </div>
         ))}
