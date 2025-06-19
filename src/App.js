@@ -1,100 +1,82 @@
 import React, { useState } from "react";
 import "./App.css";
 
-const suits = ["♠", "♥", "♣", "♦"];
+const suits = ["♠", "♥", "♦", "♣"];
 const values = ["3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A", "2"];
 
-const suitColors = {
-  "♠": "black",
-  "♣": "black",
-  "♥": "red",
-  "♦": "red",
-};
-
-const generateDeck = () => {
+function shuffleDeck() {
   const deck = [];
   for (let suit of suits) {
     for (let value of values) {
-      deck.push({ suit, value });
+      deck.push({ value, suit });
     }
   }
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
   return deck;
-};
+}
 
-const Card = ({ card }) => (
-  <div
-    style={{
-      color: suitColors[card.suit],
-      border: "1px solid #ccc",
-      borderRadius: "8px",
-      padding: "8px",
-      width: "40px",
-      height: "60px",
-      backgroundColor: "white",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      fontWeight: "bold",
-      fontSize: "16px",
-      boxShadow: "2px 2px 4px rgba(0,0,0,0.2)",
-    }}
-  >
-    {card.value}
-    {card.suit}
-  </div>
-);
-
-const PlayerHand = ({ cards, playerName }) => (
-  <div style={{ marginBottom: "16px" }}>
-    <h2 style={{ fontSize: "18px", fontWeight: "bold" }}>{playerName}</h2>
-    <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-      {cards.map((card, i) => (
-        <Card key={i} card={card} />
-      ))}
-    </div>
-  </div>
-);
+function Card({ card }) {
+  const isRed = card.suit === "♥" || card.suit === "♦";
+  return (
+    <span
+      style={{
+        display: "inline-block",
+        margin: "4px",
+        padding: "6px 10px",
+        border: "1px solid #ccc",
+        borderRadius: "6px",
+        color: isRed ? "red" : "black",
+        backgroundColor: "white",
+        fontFamily: "monospace",
+      }}
+    >
+      {card.value} {card.suit}
+    </span>
+  );
+}
 
 function App() {
-  const [players, setPlayers] = useState([
-    { name: "Player 1", hand: [] },
-    { name: "Player 2", hand: [] },
-    { name: "Player 3", hand: [] },
-    { name: "Player 4", hand: [] },
-  ]);
+  const [players, setPlayers] = useState([[], [], [], []]);
+  const [turn, setTurn] = useState(0);
 
-  const dealCards = () => {
-    const shuffled = generateDeck().sort(() => Math.random() - 0.5);
-    const newPlayers = players.map((player, index) => ({
-      ...player,
-      hand: shuffled.slice(index * 13, (index + 1) * 13),
-    }));
+  const handleShuffle = () => {
+    const deck = shuffleDeck();
+    const newPlayers = [[], [], [], []];
+    for (let i = 0; i < deck.length; i++) {
+      newPlayers[i % 4].push(deck[i]);
+    }
     setPlayers(newPlayers);
+    setTurn(0); // reset ke Player 1
+  };
+
+  const nextTurn = () => {
+    setTurn((turn + 1) % 4);
   };
 
   return (
-    <div style={{ padding: "16px" }}>
-      <h1 style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "16px" }}>
-        Capsa Banting (Prototype)
-      </h1>
-      <button
-        onClick={dealCards}
-        style={{
-          backgroundColor: "#3b82f6",
-          color: "white",
-          padding: "8px 16px",
-          borderRadius: "6px",
-          border: "none",
-          marginBottom: "24px",
-          cursor: "pointer",
-        }}
-      >
-        Bagi Kartu
-      </button>
+    <div className="App" style={{ padding: "20px" }}>
+      <h2>Capsa Banting (Prototype)</h2>
+      <button onClick={handleShuffle}>Bagi Kartu</button>
+      <h3 style={{ marginTop: "10px" }}>Giliran: Player {turn + 1}</h3>
+      <button onClick={nextTurn}>Lewat</button>
 
-      {players.map((player, i) => (
-        <PlayerHand key={i} cards={player.hand} playerName={player.name} />
-      ))}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+        {players.map((cards, index) => (
+          <div key={index}>
+            <h4 style={{ color: turn === index ? "blue" : "black" }}>
+              Player {index + 1}
+            </h4>
+            <div>
+              {cards.map((card, i) => (
+                <Card key={i} card={card} />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
